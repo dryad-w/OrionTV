@@ -10,6 +10,7 @@ import { Search, Settings, LogOut, Heart } from "lucide-react-native";
 import { StyledButton } from "@/components/StyledButton";
 import useHomeStore, { RowItem, Category } from "@/stores/homeStore";
 import useAuthStore from "@/stores/authStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import CustomScrollView from "@/components/CustomScrollView";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
 import { getCommonResponsiveStyles } from "@/utils/ResponsiveStyles";
@@ -45,7 +46,9 @@ export default function HomeScreen() {
     clearError,
   } = useHomeStore();
   const { isLoggedIn, logout } = useAuthStore();
+  const { m3uUrl } = useSettingsStore();
   const apiConfigStatus = useApiConfig();
+  const hasLiveSource = m3uUrl.trim().length > 0;
 
   useFocusEffect(
     useCallback(() => {
@@ -200,11 +203,13 @@ export default function HomeScreen() {
       <View style={dynamicStyles.headerContainer}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <ThemedText style={dynamicStyles.headerTitle}>首页</ThemedText>
-          <Pressable android_ripple={Platform.isTV || deviceType !== 'tv'? { color: 'transparent' } : { color: Colors.dark.link }} style={{ marginLeft: 20 }} onPress={() => router.push("/live")}>
-            {({ focused }) => (
-              <ThemedText style={[dynamicStyles.headerTitle, { color: focused ? "white" : "grey" }]}>直播</ThemedText>
-            )}
-          </Pressable>
+          {hasLiveSource && (
+            <Pressable android_ripple={Platform.isTV || deviceType !== 'tv'? { color: 'transparent' } : { color: Colors.dark.link }} style={{ marginLeft: 20 }} onPress={() => router.push("/live")}>
+              {({ focused }) => (
+                <ThemedText style={[dynamicStyles.headerTitle, { color: focused ? "white" : "grey" }]}>直播</ThemedText>
+              )}
+            </Pressable>
+          )}
         </View>
         <View style={dynamicStyles.rightHeaderButtons}>
           <StyledButton style={dynamicStyles.iconButton} onPress={() => router.push("/favorites")} variant="ghost">
