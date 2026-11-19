@@ -180,6 +180,14 @@ const LoginModal = () => {
     passwordInputRef.current?.focus();
   };
 
+  const handleReenter = () => {
+    if (serverConfig?.StorageType === "localstorage") {
+      passwordInputRef.current?.focus();
+    } else {
+      usernameInputRef.current?.focus();
+    }
+  };
+
   return (
     <Modal
       transparent={true}
@@ -202,6 +210,7 @@ const LoginModal = () => {
               returnKeyType="next"
               onSubmitEditing={handleUsernameSubmit}
               blurOnSubmit={false}
+              focusable
             />
           )}
           <TextInput
@@ -214,17 +223,26 @@ const LoginModal = () => {
             onChangeText={setPassword}
             returnKeyType="go"
             onSubmitEditing={handleLogin}
+            focusable
           />
-          <StyledButton
-            ref={loginButtonRef}
-            text={isLoading ? "" : "登录"}
-            onPress={handleLogin}
-            disabled={isLoading}
-            style={styles.button}
-            hasTVPreferredFocus={initialFocusTarget === "login"}
-          >
-            {isLoading && <ActivityIndicator color="#fff" />}
-          </StyledButton>
+          <View style={styles.buttonRow}>
+            <StyledButton
+              text="重输"
+              onPress={handleReenter}
+              disabled={isLoading}
+              style={styles.reenterButton}
+            />
+            <StyledButton
+              ref={loginButtonRef}
+              text={isLoading ? "" : "登录"}
+              onPress={handleLogin}
+              disabled={isLoading}
+              style={styles.button}
+              hasTVPreferredFocus={initialFocusTarget === "login"}
+            >
+              {isLoading && <ActivityIndicator color="#fff" />}
+            </StyledButton>
+          </View>
         </ThemedView>
       </View>
     </Modal>
@@ -269,8 +287,18 @@ const styles = StyleSheet.create({
     borderColor: "#555",
   },
   button: {
-    width: "100%",
+    flex: 1,
     height: 50,
+  },
+  reenterButton: {
+    flex: 1,
+    height: 50,
+    marginRight: 12,
+  },
+  buttonRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
 
