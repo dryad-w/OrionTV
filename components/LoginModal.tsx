@@ -39,6 +39,7 @@ const LoginModal = () => {
   const usernameInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
   const loginButtonRef = useRef<View>(null);
+  const passwordFocusedRef = useRef(false);
   const [initialFocusTarget, setInitialFocusTarget] = useState<LoginFocusTarget>(null);
   const pathname = usePathname();
   const isSettingsPage = pathname.includes("settings");
@@ -180,6 +181,28 @@ const LoginModal = () => {
     passwordInputRef.current?.focus();
   };
 
+  const handlePasswordSubmit = () => {
+    if (!isLoginModalVisible || isLoading) {
+      return;
+    }
+
+    loginButtonRef.current?.focus();
+  };
+
+  useEffect(() => {
+    if (!isLoginModalVisible || isSettingsPage) {
+      return;
+    }
+
+    const subscription = Keyboard.addListener("keyboardDidHide", () => {
+      if (passwordFocusedRef.current && !isLoading) {
+        loginButtonRef.current?.focus();
+      }
+    });
+
+    return () => subscription.remove();
+  }, [isLoading, isLoginModalVisible, isSettingsPage]);
+
   const handleReenter = () => {
     if (serverConfig?.StorageType === "localstorage") {
       passwordInputRef.current?.focus();
@@ -221,9 +244,17 @@ const LoginModal = () => {
             secureTextEntry
             value={password}
             onChangeText={setPassword}
-            returnKeyType="go"
-            onSubmitEditing={handleLogin}
+            returnKeyType="next"
+            onSubmitEditing={handlePasswordSubmit}
+            onEndEditing={handlePasswordSubmit}
+            blurOnSubmit={false}
             focusable
+            onFocus={() => {
+              passwordFocusedRef.current = true;
+            }}
+            onBlur={() => {
+              passwordFocusedRef.current = false;
+            }}
           />
           <View style={styles.buttonRow}>
             <StyledButton
