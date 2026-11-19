@@ -1,57 +1,91 @@
-name: Build Android APK
+name: Build Android TV APK
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: Create or update a GitHub Release
+        type: boolean
+        default: true
+      prerelease:
+        description: Mark the GitHub Release as a prerelease
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
+concurrency:
+  group: android-tv-apk-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  direct_build:
+  build:
     name: Build Android TV APK
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: "yarn"
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Get version from package.json
-        id: package-version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
       - name: Setup JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
 
-      - name: Prebuild TV App
-        run: yarn prebuild
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-      - name: Build TV APK
-        run: yarn build
+      - name: Read app version
+        id: app-version
+        shell: bash
+        run: echo "value=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
-      - name: Rename APK file
+      - name: Generate Android TV project
+        env:
+          EXPO_TV: "1"
+          EXPO_USE_METRO_WORKSPACE_ROOT: "1"
+        run: |
+          npx expo prebuild --platform android --clean
+          yarn copy-config
+
+      - name: Build release APK
+        run: |
+          cd android
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Prepare APK artifact
+        env:
+          APP_VERSION: ${{ steps.app-version.outputs.value }}
         run: |
           mkdir -p artifacts
-          cp android/app/build/outputs/apk/release/app-release.apk artifacts/orionTV.${{ steps.package-version.outputs.version }}.apk
+          cp android/app/build/outputs/apk/release/app-release.apk "artifacts/orionTV.${APP_VERSION}.apk"
+          cd artifacts
+          sha256sum "orionTV.${APP_VERSION}.apk" > "orionTV.${APP_VERSION}.apk.sha256"
+
+      - name: Upload APK workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OrionTV-${{ steps.app-version.outputs.value }}
+          path: artifacts/*
+          if-no-files-found: error
 
       - name: Create Release and Upload APK
+        if: ${{ inputs.release }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.package-version.outputs.version }}
-          name: Release v${{ steps.package-version.outputs.version }}
-          body: Automated release for version v${{ steps.package-version.outputs.version }}.
+          tag_name: v${{ steps.app-version.outputs.value }}
+          name: Release v${{ steps.app-version.outputs.value }}
+          body: Android TV APK for v${{ steps.app-version.outputs.value }}.
           draft: false
-          prerelease: false
-          files: artifacts/orionTV.${{ steps.package-version.outputs.version }}.apk
+          prerelease: ${{ inputs.prerelease }}
+          overwrite_files: true
+          files: artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
