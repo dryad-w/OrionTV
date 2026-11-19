@@ -45,7 +45,7 @@ jobs:
       - name: Read app version
         id: app-version
         shell: bash
-        run: echo "value=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+        run: echo "value=$(node -p "require('./app.json').expo.version")" >> "$GITHUB_OUTPUT"
 
       - name: Generate Android TV project
         env:
@@ -80,9 +80,9 @@ jobs:
         if: ${{ inputs.release }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.app-version.outputs.value }}
-          name: Release v${{ steps.app-version.outputs.value }}
-          body: Android TV APK for v${{ steps.app-version.outputs.value }}.
+          tag_name: ${{ steps.app-version.outputs.value }}
+          name: Release ${{ steps.app-version.outputs.value }}
+          body: Android TV APK for ${{ steps.app-version.outputs.value }}.
           draft: false
           prerelease: ${{ inputs.prerelease }}
           overwrite_files: true
