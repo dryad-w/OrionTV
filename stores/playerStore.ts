@@ -41,7 +41,9 @@ interface PlayerState {
   }) => Promise<void>;
   playEpisode: (index: number) => void;
   togglePlayPause: () => void;
-  seek: (duration: number) => void;
+  seek: (duration: number) => Promise<void>;
+  seekTo: (positionMillis: number) => Promise<void>;
+  seekToStart: () => Promise<void>;
   handlePlaybackStatusUpdate: (newStatus: AVPlaybackStatus) => void;
   setLoading: (loading: boolean) => void;
   setShowControls: (show: boolean) => void;
@@ -272,17 +274,11 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     }
   },
 
-  seek: async (duration) => {
+  seekTo: async (positionMillis) => {
     const { status, videoRef } = get();
     if (!status?.isLoaded || !status.durationMillis) return;
 
-    const newPosition = Math.max(0, Math.min(status.positionMillis + duration, status.durationMillis));
-    try {
-      await videoRef?.current?.setPositionAsync(newPosition);
-    } catch (error) {
-      logger.debug("Failed to seek video:", error);
-      Toast.show({ type: "error", text1: "快进/快退失败" });
-    }
+    const newPosition = Math.max(0, Math.min(positionMillis, status.durationMillis));
 
     set({
       isSeeking: true,
@@ -294,7 +290,29 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
     }
     const timeoutId = setTimeout(() => set({ isSeeking: false }), 1000);
     set({ _seekTimeout: timeoutId });
+
+    try {
+      await videoRef?.current?.setPositionAsync(newPosition);
+    } catch (error) {
+      logger.debug("Failed to seek video:", error);
+      Toast.show({ type: "error", text1: "快进/快退失败" });
+    }
   },
+
+  seek: async (duration) => {
+    const { status, isSeeking, seekPosition } = get();
+    if (!status?.isLoaded || !status.durationMillis) return;
+
+    // During rapid long-press seeking, playback status may lag behind.
+    // Chain from the last requested target so repeated seeks accumulate.
+    const currentTarget = isSeeking
+      ? seekPosition * status.durationMillis
+      : status.positionMillis;
+
+    await get().seekTo(currentTarget + duration);
+  },
+
+  seekToStart: () => get().seekTo(0),
 
   setIntroEndTime: () => {
     const { status, introEndTime: existingIntroEndTime } = get();
