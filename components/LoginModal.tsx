@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Modal, View, TextInput, StyleSheet, ActivityIndicator, Alert, Keyboard, InteractionManager, Platform } from "react-native";
 import { usePathname } from "expo-router";
 import Toast from "react-native-toast-message";
@@ -40,6 +40,7 @@ const LoginModal = () => {
   const passwordInputRef = useRef<TextInput>(null);
   const loginButtonRef = useRef<View>(null);
   const passwordFocusedRef = useRef(false);
+  const loginFocusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [initialFocusTarget, setInitialFocusTarget] = useState<LoginFocusTarget>(null);
   const pathname = usePathname();
   const isSettingsPage = pathname.includes("settings");
@@ -181,13 +182,24 @@ const LoginModal = () => {
     passwordInputRef.current?.focus();
   };
 
-  const handlePasswordSubmit = () => {
+  const focusLoginAfterKeyboard = useCallback(() => {
     if (!isLoginModalVisible || isLoading) {
       return;
     }
 
-    loginButtonRef.current?.focus();
-  };
+    Keyboard.dismiss();
+    passwordInputRef.current?.blur();
+
+    if (loginFocusTimeoutRef.current) {
+      clearTimeout(loginFocusTimeoutRef.current);
+    }
+
+    loginFocusTimeoutRef.current = setTimeout(() => {
+      if (isLoginModalVisible && !isLoading) {
+        loginButtonRef.current?.requestTVFocus();
+      }
+    }, 200);
+  }, [isLoading, isLoginModalVisible]);
 
   useEffect(() => {
     if (!isLoginModalVisible || isSettingsPage) {
@@ -196,12 +208,18 @@ const LoginModal = () => {
 
     const subscription = Keyboard.addListener("keyboardDidHide", () => {
       if (passwordFocusedRef.current && !isLoading) {
-        loginButtonRef.current?.focus();
+        focusLoginAfterKeyboard();
       }
     });
 
-    return () => subscription.remove();
-  }, [isLoading, isLoginModalVisible, isSettingsPage]);
+    return () => {
+      subscription.remove();
+      if (loginFocusTimeoutRef.current) {
+        clearTimeout(loginFocusTimeoutRef.current);
+        loginFocusTimeoutRef.current = null;
+      }
+    };
+  }, [focusLoginAfterKeyboard, isLoading, isLoginModalVisible, isSettingsPage]);
 
   const handleReenter = () => {
     if (serverConfig?.StorageType === "localstorage") {
@@ -245,8 +263,8 @@ const LoginModal = () => {
             value={password}
             onChangeText={setPassword}
             returnKeyType="next"
-            onSubmitEditing={handlePasswordSubmit}
-            onEndEditing={handlePasswordSubmit}
+            onSubmitEditing={focusLoginAfterKeyboard}
+            onEndEditing={focusLoginAfterKeyboard}
             blurOnSubmit={false}
             focusable
             onFocus={() => {
