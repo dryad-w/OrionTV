@@ -127,6 +127,9 @@ const LoginModal = () => {
       return;
     }
     setIsLoading(true);
+    loginButtonRef.current?.blur();
+    Keyboard.dismiss();
+
     try {
       await api.login(isLocalStorage ? undefined : username, password);
       await checkLoginStatus(apiBaseUrl);
@@ -147,10 +150,8 @@ const LoginModal = () => {
 
             // 在登录成功后清理状态，再显示 Alert
       const hideAndAlert = () => {
-        hideLoginModal();
         setIsModalReady(false);
-        Keyboard.dismiss();
-
+        hideLoginModal();
         setTimeout(() => {
           Alert.alert(
             "免责声明",
