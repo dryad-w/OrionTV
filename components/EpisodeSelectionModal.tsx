@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Modal, FlatList } from "react-native";
 import { StyledButton } from "./StyledButton";
+import { ThemedText } from "./ThemedText";
 import usePlayerStore from "@/stores/playerStore";
 
 interface EpisodeSelectionModalProps {}
@@ -10,6 +11,7 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
 
   const [episodeGroupSize] = useState(30);
   const [selectedEpisodeGroup, setSelectedEpisodeGroup] = useState(Math.floor(currentEpisodeIndex / episodeGroupSize));
+  const [showEpisodeTitles, setShowEpisodeTitles] = useState(false);
 
   const onSelectEpisode = (index: number) => {
     playEpisode(index);
@@ -24,7 +26,16 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
     <Modal visible={showEpisodeModal} transparent={true} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>选择剧集</Text>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>选择剧集</Text>
+            <StyledButton
+              text={showEpisodeTitles ? "隐藏简介" : "显示简介"}
+              onPress={() => setShowEpisodeTitles((visible) => !visible)}
+              isSelected={showEpisodeTitles}
+              style={styles.summaryToggle}
+              textStyle={styles.summaryToggleText}
+            />
+          </View>
 
           {episodes.length > episodeGroupSize && (
             <View style={styles.episodeGroupContainer}>
@@ -44,18 +55,40 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
             </View>
           )}
           <FlatList
+            key={showEpisodeTitles ? "episode-summaries" : "episode-grid"}
             data={episodes.slice(
               selectedEpisodeGroup * episodeGroupSize,
               (selectedEpisodeGroup + 1) * episodeGroupSize
             )}
-            numColumns={5}
+            numColumns={showEpisodeTitles ? 1 : 5}
+            columnWrapperStyle={showEpisodeTitles ? undefined : styles.episodeRow}
             contentContainerStyle={styles.episodeList}
             keyExtractor={(_, index) => `episode-${selectedEpisodeGroup * episodeGroupSize + index}`}
             renderItem={({ item, index }) => {
               const absoluteIndex = selectedEpisodeGroup * episodeGroupSize + index;
+              const episodeTitle = item.title || `第 ${absoluteIndex + 1} 集`;
+
+              if (showEpisodeTitles) {
+                return (
+                  <StyledButton
+                    onPress={() => onSelectEpisode(absoluteIndex)}
+                    isSelected={currentEpisodeIndex === absoluteIndex}
+                    hasTVPreferredFocus={currentEpisodeIndex === absoluteIndex}
+                    style={[styles.episodeItem, styles.episodeSummaryItem]}
+                  >
+                    <View style={styles.episodeSummary}>
+                      <Text style={styles.episodeSummaryIndex}>{absoluteIndex + 1}</Text>
+                      <ThemedText style={styles.episodeSummaryTitle} numberOfLines={2}>
+                        {episodeTitle}
+                      </ThemedText>
+                    </View>
+                  </StyledButton>
+                );
+              }
+
               return (
                 <StyledButton
-                  text={item.title || `第 ${absoluteIndex + 1} 集`}
+                  text={`${absoluteIndex + 1}`}
                   onPress={() => onSelectEpisode(absoluteIndex)}
                   isSelected={currentEpisodeIndex === absoluteIndex}
                   hasTVPreferredFocus={currentEpisodeIndex === absoluteIndex}
@@ -84,14 +117,28 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.85)",
     padding: 20,
   },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
   modalTitle: {
     color: "white",
-    marginBottom: 12,
-    textAlign: "center",
     fontSize: 18,
     fontWeight: "bold",
   },
+  summaryToggle: {
+    minWidth: 112,
+    paddingVertical: 6,
+  },
+  summaryToggleText: {
+    fontSize: 13,
+  },
   episodeList: {
+    justifyContent: "flex-start",
+  },
+  episodeRow: {
     justifyContent: "flex-start",
   },
   episodeItem: {
@@ -101,6 +148,31 @@ const styles = StyleSheet.create({
   },
   episodeItemText: {
     fontSize: 14,
+  },
+  episodeSummaryItem: {
+    width: "96%",
+    alignSelf: "center",
+    marginHorizontal: 0,
+    marginVertical: 4,
+    paddingVertical: 8,
+  },
+  episodeSummary: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  episodeSummaryIndex: {
+    width: 44,
+    color: "#aaa",
+    fontSize: 14,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  episodeSummaryTitle: {
+    flex: 1,
+    color: "white",
+    fontSize: 15,
+    lineHeight: 21,
   },
   episodeGroupContainer: {
     flexDirection: "row",
