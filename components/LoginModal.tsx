@@ -105,6 +105,7 @@ const LoginModal = () => {
             }
             break;
         }
+        setInitialFocusTarget(null);
       }, 100);
 
       return () => clearTimeout(focusTimeout);
