@@ -9,9 +9,24 @@ interface EpisodeSelectionModalProps {}
 export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () => {
   const { showEpisodeModal, episodes, currentEpisodeIndex, playEpisode, setShowEpisodeModal } = usePlayerStore();
 
-  const [episodeGroupSize] = useState(30);
-  const [selectedEpisodeGroup, setSelectedEpisodeGroup] = useState(Math.floor(currentEpisodeIndex / episodeGroupSize));
   const [showEpisodeTitles, setShowEpisodeTitles] = useState(false);
+  const episodeGroupSize = showEpisodeTitles ? 12 : 30;
+  const [selectedEpisodeGroup, setSelectedEpisodeGroup] = useState(
+    Math.floor(currentEpisodeIndex / episodeGroupSize)
+  );
+  const groupStartIndex = selectedEpisodeGroup * episodeGroupSize;
+  const groupEndIndex = Math.min(groupStartIndex + episodeGroupSize, episodes.length);
+  const preferredEpisodeIndex =
+    currentEpisodeIndex >= groupStartIndex && currentEpisodeIndex < groupEndIndex
+      ? currentEpisodeIndex
+      : groupStartIndex;
+
+  const onToggleEpisodeTitles = () => {
+    const nextShowEpisodeTitles = !showEpisodeTitles;
+    const nextEpisodeGroupSize = nextShowEpisodeTitles ? 12 : 30;
+    setSelectedEpisodeGroup(Math.floor(currentEpisodeIndex / nextEpisodeGroupSize));
+    setShowEpisodeTitles(nextShowEpisodeTitles);
+  };
 
   const onSelectEpisode = (index: number) => {
     playEpisode(index);
@@ -30,7 +45,7 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
             <Text style={styles.modalTitle}>选择剧集</Text>
             <StyledButton
               text={showEpisodeTitles ? "隐藏简介" : "显示简介"}
-              onPress={() => setShowEpisodeTitles((visible) => !visible)}
+              onPress={onToggleEpisodeTitles}
               isSelected={showEpisodeTitles}
               style={styles.summaryToggle}
               textStyle={styles.summaryToggleText}
@@ -55,15 +70,21 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
             </View>
           )}
           <FlatList
-            key={showEpisodeTitles ? "episode-summaries" : "episode-grid"}
+            key={`${showEpisodeTitles ? "episode-summaries" : "episode-grid"}-${selectedEpisodeGroup}`}
             data={episodes.slice(
               selectedEpisodeGroup * episodeGroupSize,
               (selectedEpisodeGroup + 1) * episodeGroupSize
             )}
-            numColumns={showEpisodeTitles ? 1 : 5}
-            columnWrapperStyle={showEpisodeTitles ? undefined : styles.episodeRow}
-            contentContainerStyle={styles.episodeList}
+            numColumns={showEpisodeTitles ? 2 : 5}
+            columnWrapperStyle={styles.episodeRow}
+            contentContainerStyle={[
+              styles.episodeList,
+              showEpisodeTitles && styles.episodeSummaryList,
+            ]}
             keyExtractor={(_, index) => `episode-${selectedEpisodeGroup * episodeGroupSize + index}`}
+            initialNumToRender={episodeGroupSize}
+            removeClippedSubviews={false}
+            extraData={currentEpisodeIndex}
             renderItem={({ item, index }) => {
               const absoluteIndex = selectedEpisodeGroup * episodeGroupSize + index;
               const episodeTitle = item.title || `第 ${absoluteIndex + 1} 集`;
@@ -73,13 +94,13 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
                   <StyledButton
                     onPress={() => onSelectEpisode(absoluteIndex)}
                     isSelected={currentEpisodeIndex === absoluteIndex}
-                    hasTVPreferredFocus={currentEpisodeIndex === absoluteIndex}
+                    hasTVPreferredFocus={absoluteIndex === preferredEpisodeIndex}
                     disableFocusScale
                     style={[styles.episodeItem, styles.episodeSummaryItem]}
                   >
                     <View style={styles.episodeSummary}>
                       <Text style={styles.episodeSummaryIndex}>{absoluteIndex + 1}</Text>
-                      <ThemedText style={styles.episodeSummaryTitle} numberOfLines={2}>
+                      <ThemedText style={styles.episodeSummaryTitle} numberOfLines={1}>
                         {episodeTitle}
                       </ThemedText>
                     </View>
@@ -92,7 +113,7 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
                   text={`${absoluteIndex + 1}`}
                   onPress={() => onSelectEpisode(absoluteIndex)}
                   isSelected={currentEpisodeIndex === absoluteIndex}
-                  hasTVPreferredFocus={currentEpisodeIndex === absoluteIndex}
+                  hasTVPreferredFocus={absoluteIndex === preferredEpisodeIndex}
                   style={styles.episodeItem}
                   textStyle={styles.episodeItemText}
                 />
@@ -140,6 +161,9 @@ const styles = StyleSheet.create({
   episodeList: {
     justifyContent: "flex-start",
   },
+  episodeSummaryList: {
+    paddingBottom: 100,
+  },
   episodeRow: {
     justifyContent: "flex-start",
   },
@@ -152,11 +176,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   episodeSummaryItem: {
-    width: "96%",
-    alignSelf: "center",
-    marginHorizontal: 0,
-    marginVertical: 4,
-    paddingVertical: 8,
+    width: "48%",
+    height: 44,
+    alignSelf: "flex-start",
+    marginHorizontal: "1%",
+    marginVertical: 2,
+    paddingVertical: 0,
+    justifyContent: "center",
   },
   episodeSummary: {
     width: "100%",
