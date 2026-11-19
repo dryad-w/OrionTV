@@ -74,6 +74,7 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
                     onPress={() => onSelectEpisode(absoluteIndex)}
                     isSelected={currentEpisodeIndex === absoluteIndex}
                     hasTVPreferredFocus={currentEpisodeIndex === absoluteIndex}
+                    disableFocusScale
                     style={[styles.episodeItem, styles.episodeSummaryItem]}
                   >
                     <View style={styles.episodeSummary}>
@@ -114,8 +115,9 @@ const styles = StyleSheet.create({
   modalContent: {
     width: 600,
     height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.85)",
+    backgroundColor: "#111111",
     padding: 20,
+    overflow: "hidden",
   },
   modalHeader: {
     flexDirection: "row",

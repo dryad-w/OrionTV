@@ -10,16 +10,29 @@ interface StyledButtonProps extends PressableProps {
   text?: string;
   variant?: "default" | "primary" | "ghost";
   isSelected?: boolean;
+  disableFocusScale?: boolean;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
 }
 
 export const StyledButton = forwardRef<View, StyledButtonProps>(
-  ({ children, text, variant = "default", isSelected = false, style, textStyle, ...rest }, ref) => {
+  (
+    {
+      children,
+      text,
+      variant = "default",
+      isSelected = false,
+      disableFocusScale = false,
+      style,
+      textStyle,
+      ...rest
+    },
+    ref
+  ) => {
     const colorScheme = "dark";
     const colors = Colors[colorScheme];
     const [isFocused, setIsFocused] = React.useState(false);
-    const animationStyle = useButtonAnimation(isFocused);
+    const animationStyle = useButtonAnimation(isFocused, disableFocusScale ? 1 : 1.1);
     const deviceType = useResponsiveLayout().deviceType;
 
     const variantStyles = {
