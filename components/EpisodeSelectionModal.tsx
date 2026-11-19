@@ -1,10 +1,77 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Modal, FlatList } from "react-native";
+import React, { memo, useCallback, useState } from "react";
+import { View, Text, StyleSheet, Modal, FlatList, Pressable } from "react-native";
 import { StyledButton } from "./StyledButton";
 import { ThemedText } from "./ThemedText";
 import usePlayerStore from "@/stores/playerStore";
+import { Colors } from "@/constants/Colors";
 
 interface EpisodeSelectionModalProps {}
+
+interface EpisodeItemProps {
+  episodeNumber: number;
+  title?: string;
+  isSelected: boolean;
+  hasTVPreferredFocus: boolean;
+  onSelect: (index: number) => void;
+}
+
+const EpisodeGridItem = memo(function EpisodeGridItem({
+  episodeNumber,
+  isSelected,
+  hasTVPreferredFocus,
+  onSelect,
+}: EpisodeItemProps) {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <Pressable
+      focusable
+      hasTVPreferredFocus={hasTVPreferredFocus}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      onPress={() => onSelect(episodeNumber - 1)}
+      style={[
+        styles.episodeGridItem,
+        isSelected && styles.episodeGridItemSelected,
+        isFocused && styles.episodeGridItemFocused,
+      ]}
+    >
+      <Text style={styles.episodeItemText}>{episodeNumber}</Text>
+    </Pressable>
+  );
+});
+
+const EpisodeSummaryItem = memo(function EpisodeSummaryItem({
+  episodeNumber,
+  title,
+  isSelected,
+  hasTVPreferredFocus,
+  onSelect,
+}: EpisodeItemProps) {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <Pressable
+      focusable
+      hasTVPreferredFocus={hasTVPreferredFocus}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      onPress={() => onSelect(episodeNumber - 1)}
+      style={[
+        styles.episodeSummaryItem,
+        isSelected && styles.episodeSummaryItemSelected,
+        isFocused && styles.episodeSummaryItemFocused,
+      ]}
+    >
+      <View style={styles.episodeSummary}>
+        <Text style={styles.episodeSummaryIndex}>{episodeNumber}</Text>
+        <ThemedText style={styles.episodeSummaryTitle} numberOfLines={1}>
+          {title || `第 ${episodeNumber} 集`}
+        </ThemedText>
+      </View>
+    </Pressable>
+  );
+});
 
 export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () => {
   const { showEpisodeModal, episodes, currentEpisodeIndex, playEpisode, setShowEpisodeModal } = usePlayerStore();
@@ -28,10 +95,13 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
     setShowEpisodeTitles(nextShowEpisodeTitles);
   };
 
-  const onSelectEpisode = (index: number) => {
-    playEpisode(index);
-    setShowEpisodeModal(false);
-  };
+  const onSelectEpisode = useCallback(
+    (index: number) => {
+      playEpisode(index);
+      setShowEpisodeModal(false);
+    },
+    [playEpisode, setShowEpisodeModal]
+  );
 
   const onClose = () => {
     setShowEpisodeModal(false);
@@ -87,35 +157,24 @@ export const EpisodeSelectionModal: React.FC<EpisodeSelectionModalProps> = () =>
             extraData={currentEpisodeIndex}
             renderItem={({ item, index }) => {
               const absoluteIndex = selectedEpisodeGroup * episodeGroupSize + index;
-              const episodeTitle = item.title || `第 ${absoluteIndex + 1} 集`;
-
               if (showEpisodeTitles) {
                 return (
-                  <StyledButton
-                    onPress={() => onSelectEpisode(absoluteIndex)}
+                  <EpisodeSummaryItem
+                    episodeNumber={absoluteIndex + 1}
+                    title={item.title}
                     isSelected={currentEpisodeIndex === absoluteIndex}
                     hasTVPreferredFocus={absoluteIndex === preferredEpisodeIndex}
-                    disableFocusScale
-                    style={[styles.episodeItem, styles.episodeSummaryItem]}
-                  >
-                    <View style={styles.episodeSummary}>
-                      <Text style={styles.episodeSummaryIndex}>{absoluteIndex + 1}</Text>
-                      <ThemedText style={styles.episodeSummaryTitle} numberOfLines={1}>
-                        {episodeTitle}
-                      </ThemedText>
-                    </View>
-                  </StyledButton>
+                    onSelect={onSelectEpisode}
+                  />
                 );
               }
 
               return (
-                <StyledButton
-                  text={`${absoluteIndex + 1}`}
-                  onPress={() => onSelectEpisode(absoluteIndex)}
+                <EpisodeGridItem
+                  episodeNumber={absoluteIndex + 1}
                   isSelected={currentEpisodeIndex === absoluteIndex}
                   hasTVPreferredFocus={absoluteIndex === preferredEpisodeIndex}
-                  style={styles.episodeItem}
-                  textStyle={styles.episodeItemText}
+                  onSelect={onSelectEpisode}
                 />
               );
             }}
@@ -167,13 +226,27 @@ const styles = StyleSheet.create({
   episodeRow: {
     justifyContent: "flex-start",
   },
-  episodeItem: {
-    paddingVertical: 2,
-    margin: 4,
+  episodeGridItem: {
     width: "18%",
+    minHeight: 44,
+    margin: 4,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  episodeGridItemSelected: {
+    backgroundColor: Colors.dark.primary,
+  },
+  episodeGridItemFocused: {
+    borderColor: Colors.dark.primary,
+    backgroundColor: "rgba(119, 119, 119, 0.2)",
   },
   episodeItemText: {
+    color: "white",
     fontSize: 14,
+    fontWeight: "500",
   },
   episodeSummaryItem: {
     width: "48%",
@@ -181,8 +254,19 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginHorizontal: "1%",
     marginVertical: 2,
-    paddingVertical: 0,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "transparent",
     justifyContent: "center",
+    paddingHorizontal: 12,
+    overflow: "hidden",
+  },
+  episodeSummaryItemSelected: {
+    backgroundColor: Colors.dark.primary,
+  },
+  episodeSummaryItemFocused: {
+    borderColor: Colors.dark.primary,
+    backgroundColor: "rgba(119, 119, 119, 0.2)",
   },
   episodeSummary: {
     width: "100%",
