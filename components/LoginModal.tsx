@@ -1,15 +1,33 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, View, TextInput, StyleSheet, ActivityIndicator, Alert, Keyboard, InteractionManager } from "react-native";
+import { Modal, View, TextInput, StyleSheet, ActivityIndicator, Alert, Keyboard, InteractionManager, Platform } from "react-native";
 import { usePathname } from "expo-router";
 import Toast from "react-native-toast-message";
 import useAuthStore from "@/stores/authStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import useHomeStore from "@/stores/homeStore";
 import { api } from "@/services/api";
-import { LoginCredentialsManager } from "@/services/storage";
+import { LoginCredentialsManager, type LoginCredentials } from "@/services/storage";
 import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
 import { StyledButton } from "./StyledButton";
+
+type LoginFocusTarget = "username" | "password" | "login" | null;
+
+const getInitialFocusTarget = (
+  savedCredentials: LoginCredentials | null,
+  isLocalStorage: boolean
+): LoginFocusTarget => {
+  const hasCompleteCredentials = Boolean(
+    savedCredentials?.password &&
+    (isLocalStorage || savedCredentials.username.trim())
+  );
+
+  if (hasCompleteCredentials) {
+    return "login";
+  }
+
+  return isLocalStorage ? "password" : "username";
+};
 
 const LoginModal = () => {
   const { isLoginModalVisible, hideLoginModal, checkLoginStatus } = useAuthStore();
@@ -20,6 +38,8 @@ const LoginModal = () => {
   const [isLoading, setIsLoading] = useState(false);
   const usernameInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
+  const loginButtonRef = useRef<View>(null);
+  const [initialFocusTarget, setInitialFocusTarget] = useState<LoginFocusTarget>(null);
   const pathname = usePathname();
   const isSettingsPage = pathname.includes("settings");
 
@@ -28,17 +48,31 @@ const LoginModal = () => {
   // Load saved credentials when modal opens
   useEffect(() => {
     if (isLoginModalVisible && !isSettingsPage) {
-            // 先确保键盘状态清理
+      let isActive = true;
+
+      // 先确保键盘状态清理
       Keyboard.dismiss();
+      setInitialFocusTarget(null);
 
       const loadCredentials = async () => {
         const savedCredentials = await LoginCredentialsManager.get();
+        if (!isActive) {
+          return;
+        }
+
         if (savedCredentials) {
           setUsername(savedCredentials.username);
           setPassword(savedCredentials.password);
         }
+
+        setInitialFocusTarget(
+          getInitialFocusTarget(
+            savedCredentials,
+            serverConfig?.StorageType === "localstorage"
+          )
+        );
       };
-      loadCredentials();
+      void loadCredentials();
 
       // 延迟设置 Modal 就绪状态
       const readyTimeout = setTimeout(() => {
@@ -46,29 +80,36 @@ const LoginModal = () => {
       }, 300);
 
       return () => {
+        isActive = false;
         clearTimeout(readyTimeout);
         setIsModalReady(false);
       };
     }
-  }, [isLoginModalVisible, isSettingsPage]);
+  }, [isLoginModalVisible, isSettingsPage, serverConfig?.StorageType]);
 
   // Focus management with better TV remote handling
   useEffect(() => {
-    if (isModalReady && isLoginModalVisible && !isSettingsPage) {
-      const isUsernameVisible = serverConfig?.StorageType !== "localstorage";
-
+    if (isModalReady && isLoginModalVisible && !isSettingsPage && initialFocusTarget) {
       // Use a small delay to ensure the modal is fully rendered
       const focusTimeout = setTimeout(() => {
-        if (isUsernameVisible) {
-          usernameInputRef.current?.focus();
-        } else {
-          passwordInputRef.current?.focus();
+        switch (initialFocusTarget) {
+          case "username":
+            usernameInputRef.current?.focus();
+            break;
+          case "password":
+            passwordInputRef.current?.focus();
+            break;
+          case "login":
+            if (Platform.isTV) {
+              loginButtonRef.current?.focus();
+            }
+            break;
         }
-      }, 300);
+      }, 100);
 
       return () => clearTimeout(focusTimeout);
     }
-  }, [isModalReady, isLoginModalVisible, serverConfig, isSettingsPage]);
+  }, [isModalReady, isLoginModalVisible, initialFocusTarget, isSettingsPage]);
 
   // 清理 effect - 确保 Modal 关闭时清理所有状态
   useEffect(() => {
@@ -173,11 +214,12 @@ const LoginModal = () => {
             onSubmitEditing={handleLogin}
           />
           <StyledButton
+            ref={loginButtonRef}
             text={isLoading ? "" : "登录"}
             onPress={handleLogin}
             disabled={isLoading}
             style={styles.button}
-            hasTVPreferredFocus={!serverConfig || serverConfig.StorageType === "localstorage"}
+            hasTVPreferredFocus={initialFocusTarget === "login"}
           >
             {isLoading && <ActivityIndicator color="#fff" />}
           </StyledButton>
