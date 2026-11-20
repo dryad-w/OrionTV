@@ -3,12 +3,14 @@ import * as FileSystem from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 // import * as Device from 'expo-device';
 import Toast from 'react-native-toast-message';
-import { version as currentVersion } from '../package.json';
+import appConfig from '../app.json';
 import { UPDATE_CONFIG } from '../constants/UpdateConfig';
 import Logger from '@/utils/Logger';
+import { compareVersions } from '@/utils/VersionUtils';
 import { Platform } from 'react-native';
 
 const logger = Logger.withTag('UpdateService');
+const currentVersion = appConfig.expo.version;
 
 interface VersionInfo {
   version: string;
@@ -45,8 +47,11 @@ class UpdateService {
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
-        const remotePackage = await response.json();
-        const remoteVersion = remotePackage.version as string;
+        const remoteConfig = await response.json();
+        const remoteVersion = remoteConfig.expo?.version;
+        if (typeof remoteVersion !== 'string') {
+          throw new Error('Invalid remote version');
+        }
         return {
           version: remoteVersion,
           downloadUrl: UPDATE_CONFIG.getDownloadUrl(remoteVersion),
@@ -223,18 +228,10 @@ class UpdateService {
   }
 
   /** --------------------------------------------------------------
-   *  5️⃣ 版本比对工具（保持原来的实现）
+   *  5️⃣ 版本比对工具（支持 aq.x.y.z 和 vx.y.z）
    * --------------------------------------------------------------- */
   compareVersions(v1: string, v2: string): number {
-    const p1 = v1.split('.').map(Number);
-    const p2 = v2.split('.').map(Number);
-    for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
-      const n1 = p1[i] ?? 0;
-      const n2 = p2[i] ?? 0;
-      if (n1 > n2) return 1;
-      if (n1 < n2) return -1;
-    }
-    return 0;
+    return compareVersions(v1, v2);
   }
   getCurrentVersion(): string {
     return currentVersion;
