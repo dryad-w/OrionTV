@@ -36,7 +36,7 @@
     },
     "name": "OrionTVUltra",
     "slug": "oriontvultra",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "dark",
@@ -45,7 +45,7 @@
     ],
     "android": {
       "package": "com.oriontvultra",
-      "versionCode": 2,
+      "versionCode": 3,
       "usesCleartextTraffic": true,
       "hardwareAcceleration": true,
       "networkSecurityConfig": "@xml/network_security_config",
