@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="background" x1="96" y1="64" x2="928" y2="960" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#06111F"/>
+      <stop offset="0.55" stop-color="#0A2432"/>
+      <stop offset="1" stop-color="#071725"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="translate(528 474) rotate(90) scale(420)">
+      <stop stop-color="#25D8CF" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#25D8CF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="orbit" x1="284" y1="712" x2="744" y2="292" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#44F2DB"/>
+      <stop offset="0.52" stop-color="#58D7FF"/>
+      <stop offset="1" stop-color="#8B9BFF"/>
+    </linearGradient>
+    <linearGradient id="play" x1="462" y1="374" x2="647" y2="644" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D9FFFA"/>
+    </linearGradient>
+    <radialGradient id="star" cx="0" cy="0" r="1" gradientTransform="translate(0.38 0.32) scale(0.62)">
+      <stop stop-color="#FFF8D6"/>
+      <stop offset="0.35" stop-color="#FFD36A"/>
+      <stop offset="1" stop-color="#FF9E45"/>
+    </radialGradient>
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#background)"/>
+  <rect width="1024" height="1024" fill="url(#halo)"/>
+  <path d="M624 0H1024V458L624 0Z" fill="#7EEFE5" opacity="0.035"/>
+  <path d="M0 714L510 1024H0V714Z" fill="#3DAEFC" opacity="0.05"/>
+
+  <g fill="#C8FFF8" opacity="0.7">
+    <circle cx="164" cy="222" r="4"/>
+    <circle cx="846" cy="186" r="5"/>
+    <circle cx="878" cy="758" r="4"/>
+    <circle cx="191" cy="815" r="3"/>
+    <circle cx="786" cy="850" r="3"/>
+    <circle cx="276" cy="160" r="2.5"/>
+  </g>
+
+  <path d="M512 262A250 250 0 1 0 762 512" fill="none" stroke="url(#orbit)" stroke-width="32" stroke-linecap="round" filter="url(#softGlow)" opacity="0.55"/>
+  <path d="M512 262A250 250 0 1 0 762 512" fill="none" stroke="url(#orbit)" stroke-width="25" stroke-linecap="round"/>
+  <path d="M451 613Q451 645 480 628L687 513Q714 498 687 483L480 368Q451 351 451 383Z" fill="url(#play)"/>
+
+  <g filter="url(#softGlow)" opacity="0.75">
+    <circle cx="431" cy="591" r="25" fill="#FFB34E"/>
+    <circle cx="512" cy="512" r="25" fill="#FFC65C"/>
+    <circle cx="593" cy="433" r="25" fill="#FFD86E"/>
+  </g>
+  <g>
+    <circle cx="431" cy="591" r="14" fill="url(#star)"/>
+    <circle cx="512" cy="512" r="14" fill="url(#star)"/>
+    <circle cx="593" cy="433" r="14" fill="url(#star)"/>
+  </g>
+  <path d="M431 591L512 512L593 433" fill="none" stroke="#FFD36A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+
+  <circle cx="778" cy="291" r="11" fill="#55F1DD"/>
+  <circle cx="250" cy="738" r="8" fill="#66D8FF"/>
+  <circle cx="208" cy="310" r="7" fill="#A7B3FF"/>
+</svg>

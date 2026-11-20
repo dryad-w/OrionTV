@@ -13,7 +13,7 @@ export const UPDATE_CONFIG = {
 
   // 获取平台特定的下载URL
   getDownloadUrl(version: string): string {
-    return `https://ghfast.top/https://github.com/${GITHUB_REPOSITORY}/releases/download/${version}/orionTV.${version}.apk`;
+    return `https://ghfast.top/https://github.com/${GITHUB_REPOSITORY}/releases/download/${version}/OrionTVUltra.${version}.apk`;
   },
 
   // 是否显示更新日志
@@ -31,7 +31,7 @@ export const UPDATE_CONFIG = {
   // 更新通知设置
   NOTIFICATION: {
     ENABLED: true,
-    TITLE: "OrionTV 更新",
+    TITLE: "OrionTVUltra 更新",
     DOWNLOADING_TEXT: "正在下载新版本...",
     DOWNLOAD_COMPLETE_TEXT: "下载完成，点击安装",
   },

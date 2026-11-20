@@ -34,8 +34,8 @@
     "experiments": {
       "typedRoutes": true
     },
-    "name": "OrionTV",
-    "slug": "OrionTV",
+    "name": "OrionTVUltra",
+    "slug": "oriontvultra",
     "version": "1.0.1",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
@@ -44,12 +44,16 @@
       "**/*"
     ],
     "android": {
-      "package": "com.oriontv",
+      "package": "com.oriontvultra",
       "versionCode": 2,
       "usesCleartextTraffic": true,
       "hardwareAcceleration": true,
       "networkSecurityConfig": "@xml/network_security_config",
       "icon": "./assets/images/icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#06111F"
+      },
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE",
@@ -61,7 +65,7 @@
           "action": "android.intent.action.VIEW",
           "data": [
             {
-              "scheme": "oriontv"
+              "scheme": "oriontvultra"
             }
           ],
           "category": [
@@ -72,7 +76,7 @@
       ]
     },
     "ios": {
-      "bundleIdentifier": "com.oriontv",
+      "bundleIdentifier": "com.oriontvultra",
       "supportsTablet": true,
       "requireFullScreen": false,
       "supportedInterfaceOrientations": [
@@ -85,7 +89,7 @@
         "usesNonExemptEncryption": false
       }
     },
-    "scheme": "oriontv",
+    "scheme": "oriontvultra",
     "extra": {
       "router": {
         "origin": false

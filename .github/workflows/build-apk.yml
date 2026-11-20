@@ -65,14 +65,14 @@ jobs:
           APP_VERSION: ${{ steps.app-version.outputs.value }}
         run: |
           mkdir -p artifacts
-          cp android/app/build/outputs/apk/release/app-release.apk "artifacts/orionTV.${APP_VERSION}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "artifacts/OrionTVUltra.${APP_VERSION}.apk"
           cd artifacts
-          sha256sum "orionTV.${APP_VERSION}.apk" > "orionTV.${APP_VERSION}.apk.sha256"
+          sha256sum "OrionTVUltra.${APP_VERSION}.apk" > "OrionTVUltra.${APP_VERSION}.apk.sha256"
 
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OrionTV-${{ steps.app-version.outputs.value }}
+          name: OrionTVUltra-${{ steps.app-version.outputs.value }}
           path: artifacts/*
           if-no-files-found: error
 

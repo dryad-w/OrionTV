@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="720" viewBox="0 0 1920 720">
+  <defs>
+    <linearGradient id="background" x1="40" y1="30" x2="1850" y2="690" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#06111F"/>
+      <stop offset="0.55" stop-color="#0A2432"/>
+      <stop offset="1" stop-color="#071725"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="translate(570 350) rotate(90) scale(350 820)">
+      <stop stop-color="#25D8CF" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#25D8CF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="orbit" x1="284" y1="712" x2="744" y2="292" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#44F2DB"/>
+      <stop offset="0.52" stop-color="#58D7FF"/>
+      <stop offset="1" stop-color="#8B9BFF"/>
+    </linearGradient>
+    <linearGradient id="play" x1="462" y1="374" x2="647" y2="644" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D9FFFA"/>
+    </linearGradient>
+    <radialGradient id="star" cx="0" cy="0" r="1" gradientTransform="translate(0.38 0.32) scale(0.62)">
+      <stop stop-color="#FFF8D6"/>
+      <stop offset="0.35" stop-color="#FFD36A"/>
+      <stop offset="1" stop-color="#FF9E45"/>
+    </radialGradient>
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="720" fill="url(#background)"/>
+  <rect width="1920" height="720" fill="url(#halo)"/>
+  <path d="M1160 0H1920V370L1160 0Z" fill="#7EEFE5" opacity="0.035"/>
+  <path d="M0 566L430 720H0V566Z" fill="#3DAEFC" opacity="0.05"/>
+
+  <g fill="#C8FFF8" opacity="0.65">
+    <circle cx="856" cy="112" r="4"/>
+    <circle cx="1744" cy="163" r="5"/>
+    <circle cx="1812" cy="585" r="4"/>
+    <circle cx="132" cy="594" r="3"/>
+  </g>
+
+  <g transform="translate(205 166) scale(0.42)">
+    <path d="M512 262A250 250 0 1 0 762 512" fill="none" stroke="url(#orbit)" stroke-width="32" stroke-linecap="round" filter="url(#softGlow)" opacity="0.55"/>
+    <path d="M512 262A250 250 0 1 0 762 512" fill="none" stroke="url(#orbit)" stroke-width="25" stroke-linecap="round"/>
+    <path d="M451 613Q451 645 480 628L687 513Q714 498 687 483L480 368Q451 351 451 383Z" fill="url(#play)"/>
+    <g filter="url(#softGlow)" opacity="0.75">
+      <circle cx="431" cy="591" r="25" fill="#FFB34E"/>
+      <circle cx="512" cy="512" r="25" fill="#FFC65C"/>
+      <circle cx="593" cy="433" r="25" fill="#FFD86E"/>
+    </g>
+    <g>
+      <circle cx="431" cy="591" r="14" fill="url(#star)"/>
+      <circle cx="512" cy="512" r="14" fill="url(#star)"/>
+      <circle cx="593" cy="433" r="14" fill="url(#star)"/>
+    </g>
+    <path d="M431 591L512 512L593 433" fill="none" stroke="#FFD36A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+  </g>
+
+  <g font-family="Avenir Next, Helvetica Neue, Arial, sans-serif">
+    <text x="720" y="342" fill="#F7FFFD" font-size="96" font-weight="700" letter-spacing="2">OrionTV</text>
+    <rect x="724" y="397" width="238" height="62" rx="31" fill="#0A2A37" stroke="#45E8D9" stroke-width="2.5"/>
+    <text x="767" y="440" fill="#7DF7EA" font-size="30" font-weight="700" letter-spacing="8">ULTRA</text>
+    <path d="M724 510H1282" stroke="#4ADFD4" stroke-width="2" opacity="0.45"/>
+    <circle cx="728" cy="511" r="6" fill="#FFD36A"/>
+    <circle cx="864" cy="511" r="5" fill="#FFD36A" opacity="0.8"/>
+    <circle cx="1000" cy="511" r="4" fill="#FFD36A" opacity="0.65"/>
+  </g>
+</svg>

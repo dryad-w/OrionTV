@@ -136,7 +136,7 @@ const TabletSidebarNavigator: React.FC<TabletSidebarNavigatorProps> = ({
             )}
           </TouchableOpacity>
           {!collapsed && (
-            <ThemedText style={dynamicStyles.appTitle}>OrionTV</ThemedText>
+            <ThemedText style={dynamicStyles.appTitle} numberOfLines={1}>OrionTVUltra</ThemedText>
           )}
         </View>
 
@@ -188,7 +188,7 @@ const createStyles = (spacing: number, sidebarWidth: number, isPortrait: boolean
       borderRadius: 8,
     },
     appTitle: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: 'bold',
       marginLeft: spacing,
       color: Colors.dark.primary,
