@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedView } from "@/components/ThemedView";
@@ -20,6 +20,7 @@ export default function DetailScreen() {
   const responsiveConfig = useResponsiveLayout();
   const commonStyles = getCommonResponsiveStyles(responsiveConfig);
   const { deviceType, spacing } = responsiveConfig;
+  const [showEpisodeTitles, setShowEpisodeTitles] = useState(false);
 
   const {
     detail,
@@ -105,6 +106,55 @@ export default function DetailScreen() {
   // 动态样式
   const dynamicStyles = createResponsiveStyles(deviceType, spacing);
 
+  const renderEpisodeTitleSection = () => (
+    <View style={dynamicStyles.episodesTitleContainer}>
+      <ThemedText style={dynamicStyles.episodesTitle}>播放列表</ThemedText>
+      <StyledButton
+        text={showEpisodeTitles ? "隐藏简介" : "显示简介"}
+        onPress={() => setShowEpisodeTitles((visible) => !visible)}
+        disableFocusScale
+        style={dynamicStyles.episodeToggleButton}
+        textStyle={dynamicStyles.episodeToggleText}
+      />
+    </View>
+  );
+
+  const renderEpisodeButton = (index: number) => {
+    const episodeTitle = detail?.episodes_titles?.[index]?.trim();
+
+    return (
+      <StyledButton
+        key={index}
+        style={[
+          dynamicStyles.episodeButton,
+          showEpisodeTitles && dynamicStyles.episodeTitleButton,
+        ]}
+        onPress={() => handlePlay(index)}
+      >
+        <View
+          style={[
+            dynamicStyles.episodeButtonContent,
+            showEpisodeTitles && dynamicStyles.episodeTitleButtonContent,
+          ]}
+        >
+          <ThemedText style={dynamicStyles.episodeButtonIndex}>
+            {showEpisodeTitles
+              ? String(index + 1).padStart(2, "0")
+              : `第 ${index + 1} 集`}
+          </ThemedText>
+          {showEpisodeTitles && (
+            <ThemedText
+              style={dynamicStyles.episodeButtonTitle}
+              numberOfLines={2}
+            >
+              {episodeTitle || "暂无标题"}
+            </ThemedText>
+          )}
+        </View>
+      </StyledButton>
+    );
+  };
+
   const renderDetailContent = () => {
     if (deviceType === 'mobile') {
       // 移动端垂直布局
@@ -175,17 +225,9 @@ export default function DetailScreen() {
 
           {/* 剧集列表 */}
           <View style={dynamicStyles.episodesContainer}>
-            <ThemedText style={dynamicStyles.episodesTitle}>播放列表</ThemedText>
+            {renderEpisodeTitleSection()}
             <View style={dynamicStyles.episodeList}>
-              {detail.episodes.map((episode, index) => (
-                <StyledButton
-                  key={index}
-                  style={dynamicStyles.episodeButton}
-                  onPress={() => handlePlay(index)}
-                  text={`第 ${index + 1} 集`}
-                  textStyle={dynamicStyles.episodeButtonText}
-                />
-              ))}
+              {detail.episodes.map((_, index) => renderEpisodeButton(index))}
             </View>
           </View>
         </ScrollView>
@@ -256,17 +298,9 @@ export default function DetailScreen() {
               </View>
             </View>
             <View style={dynamicStyles.episodesContainer}>
-              <ThemedText style={dynamicStyles.episodesTitle}>播放列表</ThemedText>
+              {renderEpisodeTitleSection()}
               <ScrollView contentContainerStyle={dynamicStyles.episodeList}>
-                {detail.episodes.map((episode, index) => (
-                  <StyledButton
-                    key={index}
-                    style={dynamicStyles.episodeButton}
-                    onPress={() => handlePlay(index)}
-                    text={`第 ${index + 1} 集`}
-                    textStyle={dynamicStyles.episodeButtonText}
-                  />
-                ))}
+                {detail.episodes.map((_, index) => renderEpisodeButton(index))}
               </ScrollView>
             </View>
           </View>
@@ -427,11 +461,25 @@ const createResponsiveStyles = (deviceType: string, spacing: number) => {
       marginTop: spacing,
       paddingBottom: spacing * 2,
     },
+    episodesTitleContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-start",
+      marginBottom: spacing / 2,
+    },
     episodesTitle: {
       fontSize: isMobile ? 16 : isTablet ? 18 : 20,
       fontWeight: "bold",
-      marginBottom: spacing / 2,
       color: 'white',
+    },
+    episodeToggleButton: {
+      minHeight: isMobile ? 34 : 38,
+      marginLeft: spacing,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+    },
+    episodeToggleText: {
+      fontSize: isMobile ? 12 : 14,
     },
     episodeList: {
       flexDirection: "row",
@@ -441,9 +489,29 @@ const createResponsiveStyles = (deviceType: string, spacing: number) => {
       margin: isMobile ? 3 : 5,
       minHeight: isMobile ? 32 : 36,
     },
-    episodeButtonText: {
+    episodeTitleButton: {
+      width: isMobile ? "96%" : "47%",
+      justifyContent: "flex-start",
+    },
+    episodeButtonContent: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    episodeTitleButtonContent: {
+      width: "100%",
+    },
+    episodeButtonIndex: {
       color: "white",
       fontSize: isMobile ? 12 : 14,
+      fontWeight: "500",
+      flexShrink: 0,
+    },
+    episodeButtonTitle: {
+      flex: 1,
+      marginLeft: 10,
+      color: "#bbb",
+      fontSize: isMobile ? 12 : 14,
+      lineHeight: isMobile ? 17 : 20,
     },
   });
 };
