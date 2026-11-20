@@ -8,8 +8,8 @@ describe('UPDATE_CONFIG', () => {
   });
 
   it('builds APK download URLs for the current release format', () => {
-    expect(UPDATE_CONFIG.getDownloadUrl('aq.1.0.1')).toBe(
-      'https://ghfast.top/https://github.com/dryad-w/OrionTV/releases/download/aq.1.0.1/orionTV.aq.1.0.1.apk',
+    expect(UPDATE_CONFIG.getDownloadUrl('1.0.1')).toBe(
+      'https://ghfast.top/https://github.com/dryad-w/OrionTV/releases/download/1.0.1/orionTV.1.0.1.apk',
     );
   });
 });

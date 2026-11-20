@@ -228,7 +228,7 @@ class UpdateService {
   }
 
   /** --------------------------------------------------------------
-   *  5️⃣ 版本比对工具（支持 aq.x.y.z 和 vx.y.z）
+   *  5️⃣ 版本比对工具（支持 x.y.z 和 vx.y.z）
    * --------------------------------------------------------------- */
   compareVersions(v1: string, v2: string): number {
     return compareVersions(v1, v2);

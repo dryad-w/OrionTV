@@ -1,10 +1,10 @@
 import { compareVersions } from '../VersionUtils';
 
 describe('compareVersions', () => {
-  it('compares prefixed release versions numerically', () => {
-    expect(compareVersions('aq.1.0.2', 'aq.1.0.1')).toBe(1);
-    expect(compareVersions('aq.1.0.1', 'aq.1.0.2')).toBe(-1);
-    expect(compareVersions('aq.1.0.1', 'aq.1.0.1')).toBe(0);
+  it('compares release versions numerically', () => {
+    expect(compareVersions('1.0.2', '1.0.1')).toBe(1);
+    expect(compareVersions('1.0.1', '1.0.2')).toBe(-1);
+    expect(compareVersions('1.0.1', '1.0.1')).toBe(0);
   });
 
   it('ignores a leading v for numeric versions', () => {
