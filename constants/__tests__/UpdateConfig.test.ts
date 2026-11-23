@@ -8,8 +8,8 @@ describe('UPDATE_CONFIG', () => {
   });
 
   it('builds APK download URLs for the current release format', () => {
-    expect(UPDATE_CONFIG.getDownloadUrl('1.0.2')).toBe(
-      'https://ghfast.top/https://github.com/dryad-w/OrionTV/releases/download/1.0.2/OrionTVUltra.1.0.2.apk',
+    expect(UPDATE_CONFIG.getDownloadUrl('1.0.3')).toBe(
+      'https://ghfast.top/https://github.com/dryad-w/OrionTV/releases/download/1.0.3/OrionTVUltra.1.0.3.apk',
     );
   });
 });
